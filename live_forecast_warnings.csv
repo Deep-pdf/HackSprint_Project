@@ -1,0 +1,4 @@
+Date,City,Latitude,Longitude,Max_Temp_C,Min_Temp_C,Precipitation_mm,Month,Temp_Yesterday,Temp_2_Days_Ago,Rain_Yesterday,Rolling_7_Day_Temp,Target_Next_Day_Temp,Predicted_Tomorrow_Temp,Expected_Temp_Spike,Incoming_Heatwave_Warning
+2026-03-21,Delhi,28.7041,77.1025,25.5,14.2,0.0,3,20.2,27.0,5.7,27.542857142857144,27.1,26.24218,-1.3006772722516757,False
+2026-03-21,Kolkata,22.5726,88.3639,25.0,19.9,7.0,3,30.2,34.2,16.8,31.557142857142853,27.0,27.40289,-4.154253605433869,False
+2026-03-21,Mumbai,19.076,72.8777,33.8,23.8,0.0,3,31.0,30.4,0.0,31.47142857142857,35.8,33.291702,1.820273699079241,False

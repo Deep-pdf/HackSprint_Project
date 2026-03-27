@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Climate risk | AI Anomaly System</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
@@ -32,7 +31,9 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            cursor: grab; /* Globe grabbing cursor */
         }
+        body:active { cursor: grabbing; }
 
         #header-container {
             position: absolute;
@@ -43,7 +44,6 @@
             width: 90%;
             max-width: 800px;
             
-            /* Glassmorphism */
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -113,110 +113,98 @@
 
         button:active { transform: scale(0.98); }
 
-        .btn-search {
-            background-color: var(--primary);
-            color: white;
-        }
+        .btn-search { background-color: var(--primary); color: white; }
         .btn-search:hover { background-color: var(--primary-hover); }
 
-        .btn-location {
-            background-color: var(--secondary);
+        .btn-location { background-color: var(--secondary); color: white; display: flex; align-items: center; gap: 6px; }
+        .btn-location:hover { background-color: var(--secondary-hover); }
+
+        #loading-status { margin-top: 16px; font-size: 0.9rem; font-weight: 600; height: 20px; }
+
+        #map { flex-grow: 1; width: 100%; z-index: 1; }
+
+        /* Custom 3D Globe Overlays */
+        .globe-marker {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
             color: white;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
+            pointer-events: auto; /* Required for clicking in Globe.gl */
         }
-        .btn-location:hover { background-color: var(--secondary-hover); }
-
-        #loading-status {
-            margin-top: 16px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            height: 20px;
+        .globe-marker:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 15px currentColor;
         }
 
-        #map {
-            flex-grow: 1;
-            width: 100%;
-            z-index: 1;
-        }
-
-        /* Map UI Tweaks */
-        .leaflet-popup-content-wrapper {
-            background-color: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(8px);
-            color: #ffffff;
-            border: 1px solid var(--primary);
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-        }
-        .leaflet-popup-tip { background-color: var(--primary); }
-        .safe-stat { color: #4ade80; font-weight: bold; }
-
-        /* Autocomplete Suggestions */
-        #suggestions-box {
+        /* Replaces Leaflet's Popup for 3D */
+        #custom-popup {
             position: absolute;
-            top: 100%; left: 0; width: 100%;
-            background: rgba(30, 41, 59, 0.95);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px; margin-top: 4px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            display: none; flex-direction: column;
-            z-index: 1000; max-height: 250px; overflow-y: auto;
-            box-sizing: border-box;
+            color: #ffffff;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 24px;
+            min-width: 280px;
+            display: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .close-btn:hover { color: white; }
+
+        #suggestions-box {
+            position: absolute; top: 100%; left: 0; width: 100%;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 8px; margin-top: 4px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: none; flex-direction: column;
+            z-index: 1000; max-height: 250px; overflow-y: auto; box-sizing: border-box;
         }
 
         .suggestion-item {
-            padding: 10px 16px; cursor: pointer; color: white;
-            font-size: 0.95rem; text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.2s;
+            padding: 10px 16px; cursor: pointer; color: white; font-size: 0.95rem; text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;
         }
-
         .suggestion-item:last-child { border-bottom: none; }
         .suggestion-item:hover { background: rgba(255,255,255,0.1); }
 
-        /* History Widget */
         #history-box {
-            position: absolute;
-            bottom: 30px;
-            left: 20px;
-            z-index: 999;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 260px;
-            display: none;
-            color: white;
+            position: absolute; bottom: 30px; left: 20px; z-index: 999;
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 260px; display: none; color: white;
+            pointer-events: auto;
         }
 
-        #history-box h3 {
-            margin: 0 0 12px 0;
-            font-size: 1.1rem;
-            color: #fbbf24;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 8px;
-        }
-
-        .history-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
+        #history-box h3 { margin: 0 0 12px 0; font-size: 1.1rem; color: #fbbf24; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .history-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .history-row:last-child { border-bottom: none; padding-bottom: 0; }
         .history-date { color: var(--text-muted); }
         .temp-max { color: #f87171; font-weight: 600; }
         .temp-min { color: #60a5fa; font-weight: 600; margin-left: 8px; }
+        .rain-data { color: #00bfff; font-size: 0.8rem; margin-left: 8px; }
     </style>
 </head>
 
@@ -226,13 +214,13 @@
         <h2>Spatiotemporal Climate Risk Explorer</h2>
         
         <div class="dashboard-meta">
-            <span>Target Region: <strong id="target-region" style="color: white;">Kolkata</strong></span>
+            <span>Target Region: <strong id="target-region" style="color: white;">Global View</strong></span>
             <span id="live-time"></span>
         </div>
         
         <div class="controls">
             <div style="position: relative; flex: 1; min-width: 200px;">
-                <input type="text" id="location-search" style="width: 100%; box-sizing: border-box;" placeholder="Search City, Country..." onkeydown="if(event.key === 'Enter') searchLocation()" oninput="handleSearchInput()">
+                <input type="text" id="location-search" placeholder="Search City, Country..." onkeydown="if(event.key === 'Enter') searchLocation()" oninput="handleSearchInput()">
                 <div id="suggestions-box"></div>
             </div>
             <button class="btn-search" onclick="searchLocation()">Search Region</button>
@@ -242,64 +230,93 @@
             </button>
         </div>
 
-        <div id="loading-status">System Initialized. Awaiting Input.</div>
+        <div id="loading-status">System Initialized. Mapping Global Data.</div>
     </div>
 
+    <div id="custom-popup"></div>
+
     <div id="history-box">
-        <h3>🌤️ 7-Day History</h3>
+        <h3 id="history-title">🌤️ 7-Day History</h3>
         <div id="history-list"></div>
     </div>
 
     <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/three"></script>
+    <script src="https://unpkg.com/globe.gl"></script>
+    
     <script>
         // --- 1. CLOCK --- //
         function updateClock() {
             document.getElementById('live-time').innerText = new Date().toLocaleString('en-IN', { 
-                timeZone: 'Asia/Kolkata', 
-                month: 'short', day: 'numeric', 
+                timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', 
                 hour: '2-digit', minute: '2-digit', second: '2-digit'
             }) + " (IST)";
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- 2. MAP SETUP --- //
-        var map = L.map('map', { zoomControl: false }).setView([22.5726, 88.3639], 10);
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
+        // --- 2. 3D GLOBE SETUP (Replacing Leaflet) --- //
+        const globeContainer = document.getElementById('map');
+        
+        // Initialize the WebGL Globe
+        const world = Globe()(globeContainer)
+            .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-dark.jpg') // High-res dark mode earth
+            .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+            .backgroundColor('#0f172a')
+            .pointOfView({ lat: 20, lng: 79, altitude: 2.5 }); // Start zoomed over India
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-            maxZoom: 19
-        }).addTo(map);
+        // Auto-rotate the globe for presentation appeal
+        world.controls().autoRotate = true;
+        world.controls().autoRotateSpeed = 0.5;
 
-        let activeLayers = [];
+        // Array to hold our HTML markers
+        let globeData = [];
 
-        // --- 3. GEOLOCATION & SEARCH --- //
+        // Stop rotation when user interacts
+        world.controls().addEventListener('start', () => {
+            world.controls().autoRotate = false;
+        });
+
+        // --- 3. EXPANDED GLOBAL GRID --- //
+        // Adding many places to show off the temperature comparisons as requested
+        const defaultCities = [
+            { name: "Delhi", lat: 28.7041, lon: 77.1025 },
+            { name: "Kolkata", lat: 22.5726, lon: 88.3639 },
+            { name: "Mumbai", lat: 19.0760, lon: 72.8777 },
+            { name: "Chennai", lat: 13.0827, lon: 80.2707 },
+            { name: "Tokyo", lat: 35.6762, lon: 139.6503 },
+            { name: "New York", lat: 40.7128, lon: -74.0060 },
+            { name: "London", lat: 51.5074, lon: -0.1278 },
+            { name: "Sydney", lat: -33.8688, lon: 151.2093 },
+            { name: "Paris", lat: 48.8566, lon: 2.3522 },
+            { name: "Cape Town", lat: -33.9249, lon: 18.4241 },
+            { name: "Rio de Janeiro", lat: -22.9068, lon: -43.1729 },
+            { name: "Dubai", lat: 25.2048, lon: 55.2708 },
+            { name: "Singapore", lat: 1.3521, lon: 103.8198 },
+            { name: "Moscow", lat: 55.7558, lon: 37.6173 },
+            { name: "Nairobi", lat: -1.2921, lon: 36.8219 },
+            { name: "Vancouver", lat: 49.2827, lon: -123.1207 }
+        ];
+
         function setStatus(msg, color = 'var(--text-muted)') {
             const el = document.getElementById('loading-status');
             el.innerText = msg;
             el.style.color = color;
         }
 
+        // --- 4. GEOLOCATION & SEARCH --- //
         let debounceTimer;
-
         async function handleSearchInput() {
             clearTimeout(debounceTimer);
             const query = document.getElementById('location-search').value.trim();
             const box = document.getElementById('suggestions-box');
-            
-            if (query.length < 2) {
-                if (box) box.style.display = 'none';
-                return;
-            }
+            if (query.length < 2) { if (box) box.style.display = 'none'; return; }
 
             debounceTimer = setTimeout(async () => {
                 try {
                     const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`);
                     const data = await res.json();
-                    
                     if (data.results && data.results.length > 0) {
                         box.innerHTML = '';
                         data.results.forEach(place => {
@@ -310,17 +327,14 @@
                             div.onclick = () => {
                                 document.getElementById('location-search').value = placeName;
                                 box.style.display = 'none';
-                                analyzeClimate(place.latitude, place.longitude, placeName);
+                                document.getElementById('custom-popup').style.display = 'none';
+                                analyzeClimate(place.latitude, place.longitude, placeName, true);
                             };
                             box.appendChild(div);
                         });
                         box.style.display = 'flex';
-                    } else {
-                        box.style.display = 'none';
-                    }
-                } catch (err) {
-                    console.error("Autocomplete err:", err);
-                }
+                    } else { box.style.display = 'none'; }
+                } catch (err) { console.error(err); }
             }, 300);
         }
 
@@ -338,13 +352,10 @@
                     const place = data.results[0];
                     const placeName = [place.name, place.admin1, place.country].filter(Boolean).join(", ");
                     document.getElementById('location-search').value = placeName;
-                    analyzeClimate(place.latitude, place.longitude, placeName);
-                } else {
-                    setStatus(`❌ Location not found.`, '#f87171');
-                }
-            } catch (err) {
-                setStatus('❌ Error connecting to geocoding API.', '#f87171');
-            }
+                    document.getElementById('custom-popup').style.display = 'none';
+                    analyzeClimate(place.latitude, place.longitude, placeName, true);
+                } else { setStatus(`❌ Location not found.`, '#f87171'); }
+            } catch (err) { setStatus('❌ API Error.', '#f87171'); }
         }
 
         document.addEventListener('click', (e) => {
@@ -356,164 +367,220 @@
 
         function useMyLocation() {
             setStatus('🛰️ Requesting coordinates...', '#60a5fa');
-            
             if ("geolocation" in navigator && window.location.protocol !== 'file:') {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        analyzeClimate(position.coords.latitude, position.coords.longitude, "Your Precise Location");
+                        document.getElementById('custom-popup').style.display = 'none';
+                        analyzeClimate(position.coords.latitude, position.coords.longitude, "Your Precise Location", true);
                     },
-                    (error) => {
-                        console.warn("GPS failed, falling back to IP:", error.message);
-                        fallbackToIP();
-                    },
-                    { enableHighAccuracy: true, timeout: 5000 }
+                    (error) => fallbackToIP(), { enableHighAccuracy: true, timeout: 5000 }
                 );
-            } else {
-                console.warn("Geolocation API unavailable or blocked by file:// protocol. Falling back to IP.");
-                fallbackToIP();
-            }
+            } else { fallbackToIP(); }
         }
 
         async function fallbackToIP() {
-            setStatus('🛰️ Approximating location via IP (GPS unavailable)...', '#f59e0b');
             try {
                 const res = await fetch('https://ipinfo.io/json');
                 const data = await res.json();
                 if (data.loc) {
                     const coords = data.loc.split(',');
-                    analyzeClimate(parseFloat(coords[0]), parseFloat(coords[1]), `Your Area (${data.city}, ${data.region})`);
-                } else {
-                    setStatus('❌ IP Geolocation failed.', '#f87171');
+                    document.getElementById('custom-popup').style.display = 'none';
+                    analyzeClimate(parseFloat(coords[0]), parseFloat(coords[1]), `Your Area (${data.city})`, true);
                 }
-            } catch (err) {
-                setStatus('❌ Unable to detect location automatically.', '#f87171');
-                console.error(err);
-            }
+            } catch (err) { setStatus('❌ IP Geolocation failed.', '#f87171'); }
         }
 
-        // --- 4. PYTHON LOGIC CONVERTED TO JS --- //
-        /*
-            We use Open-Meteo's forecast/historical API to get the last 90 days of temp max.
-            Then we apply the 21-day rolling average & standard deviation (2x Danger Limit).
-        */
-        async function analyzeClimate(lat, lon, regionName) {
-            document.getElementById('target-region').innerText = regionName;
-            setStatus(`📡 Fetching climate data from Open-Meteo...`, '#60a5fa');
+        // Custom Popup Logic (Replaces Leaflet Popups)
+        function showPopup(dataObj) {
+            const popup = document.getElementById('custom-popup');
+            popup.innerHTML = `<button class="close-btn" onclick="document.getElementById('custom-popup').style.display='none'">✖</button>` + dataObj.popupHTML;
+            popup.style.borderColor = dataObj.color;
+            popup.style.display = 'block';
             
-            map.flyTo([lat, lon], 10, { duration: 1.5 });
-            
-            // Clear existing markers
-            activeLayers.forEach(layer => map.removeLayer(layer));
-            activeLayers = [];
+            // Stop rotation when looking at info
+            world.controls().autoRotate = false;
+        }
+
+        // --- 5. THE AI EMERGENCY LOGIC (Untouched core logic, updated visual bindings) --- //
+        async function analyzeClimate(lat, lon, regionName, isFocused = false) {
+            if (isFocused) {
+                document.getElementById('target-region').innerText = regionName;
+                setStatus(`📡 Analyzing Risk for ${regionName}...`, '#60a5fa');
+                
+                // Fly the 3D camera to the location
+                world.pointOfView({ lat: lat, lng: lon, altitude: 0.8 }, 1500);
+            }
 
             try {
-                // Fetch 90 past days + 1 current day
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min&past_days=90&forecast_days=1&timezone=auto`;
+                // Fetch 30 past days + 2 forecast days
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&past_days=30&forecast_days=2&timezone=auto`;
                 const res = await fetch(url);
                 const data = await res.json();
                 
                 const times = data.daily.time;
                 const temps = data.daily.temperature_2m_max;
                 const mins = data.daily.temperature_2m_min;
-                // Find the latest day with valid data
-                let latestIndex = temps.length - 1;
-                while(temps[latestIndex] === null && latestIndex > 0) {
-                    latestIndex--;
-                }
+                const rain = data.daily.precipitation_sum;
                 
-                let currentTemp = temps[latestIndex];
-                let currentDate = times[latestIndex];
+                const todayIdx = temps.length - 2;
+                const tomorrowIdx = temps.length - 1;
                 
-                // Get the last 21 valid days for rolling window calculation
-                let windowTemps = temps.slice(Math.max(0, latestIndex - 20), latestIndex + 1).filter(t => t !== null);
+                const tToday = temps[todayIdx];
+                const tTomorrow = temps[tomorrowIdx];
+                const rTomorrow = rain[tomorrowIdx];
+                const currentDate = times[todayIdx];
                 
+                // Calculate 21-Day Rolling Average & StdDev
+                let windowTemps = temps.slice(Math.max(0, todayIdx - 20), todayIdx + 1).filter(t => t !== null);
                 let mean = windowTemps.reduce((a, b) => a + b, 0) / windowTemps.length;
                 let variance = windowTemps.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (windowTemps.length - 1);
                 let std = Math.sqrt(variance);
-                
                 let limit = mean + (2 * std);
                 
-                // Round to 1 decimal place matching their python output
-                let rTemp = parseFloat(currentTemp.toFixed(1));
+                let rTempTomorrow = parseFloat(tTomorrow.toFixed(1));
                 let rLimit = parseFloat(limit.toFixed(1));
 
-                let statusHex = "";
-                let alertTitle = "";
-                let alertIcon = "";
+                // --- EMERGENCY PREDICTION LOGIC --- //
+                let statusHex = "#4ade80"; // Green default
+                let alertTitle = "STABLE CLIMATE";
+                let alertIcon = "✅";
 
-                if (rTemp > rLimit) {
-                    statusHex = "#ef4444"; // Red
-                    alertTitle = "HEATWAVE ALERT";
+                if (rTomorrow > 50.0) {
+                    statusHex = "#00bfff"; // Deep Blue (Flood)
+                    alertTitle = "CRITICAL FLOOD RISK";
+                    alertIcon = "🌊";
+                    if (isFocused) setStatus(`${alertIcon} HEAVY RAIN INCOMING: ${rTomorrow}mm expected!`, statusHex);
+                } else if (rTempTomorrow > rLimit) {
+                    statusHex = "#ef4444"; // Red (Heat)
+                    alertTitle = "SUDDEN HEAT SPIKE";
                     alertIcon = "🚨";
-                    setStatus(`${alertIcon} CRITICAL: Current Temp exceeds threshold!`, statusHex);
-                } else if (rTemp === rLimit) {
-                    statusHex = "#eab308"; // Yellow
+                    if (isFocused) setStatus(`${alertIcon} WARNING: Temp spiking to ${tTomorrow}°C!`, statusHex);
+                } else if (rTempTomorrow === rLimit) {
+                    statusHex = "#eab308"; // Yellow (Warning)
                     alertTitle = "WARNING LEVEL";
                     alertIcon = "⚠️";
-                    setStatus(`${alertIcon} WARNING: Current Temp equals the Danger Limit.`, statusHex);
+                    if (isFocused) setStatus(`${alertIcon} ALERT: Temp reaching Danger Limit.`, statusHex);
                 } else {
-                    statusHex = "#4ade80"; // Green
-                    alertTitle = "STABLE CLIMATE";
-                    alertIcon = "✅";
-                    setStatus(`${alertIcon} SAFE: Normal temperatures detected.`, statusHex);
+                    if (isFocused) setStatus(`✅ ALL CLEAR: Normal conditions forecasted.`, statusHex);
                 }
 
-                let circle = L.circle([lat, lon], {
-                    color: statusHex, fillColor: statusHex, fillOpacity: 0.2, radius: 20000
-                }).addTo(map);
-                
-                let marker = L.circleMarker([lat, lon], {
-                    color: 'white', weight: 2, fillColor: statusHex, fillOpacity: 1, radius: 8
-                }).addTo(map);
+                let diffLimit = Math.abs(rTempTomorrow - rLimit).toFixed(1);
 
+                // Build HTML for Popup
                 let popupText = `
                     <h3 style="color: ${statusHex}; margin: 0 0 10px 0;">${alertIcon} ${alertTitle}</h3>
                     <b>Location:</b> ${regionName}<br>
-                    <b>Date:</b> ${currentDate}<br><br>
-                    <b>Current Temp:</b> <span style="font-weight: bold; color: ${statusHex}">${rTemp}°C</span><br>
-                    <b>21-Day Avg:</b> ${mean.toFixed(1)}°C<br>
+                    <b>21-Day Normal:</b> ${mean.toFixed(1)}°C<br>
                     <b>Danger Threshold:</b> ${rLimit}°C<br>
+                    <hr style="border-color: rgba(255,255,255,0.2); margin: 8px 0;"/>
+                    <b style="color: #fbbf24;">24-HOUR FORECAST:</b><br>
+                    <b>Incoming Temp:</b> ${rTempTomorrow}°C<br>
+                    <b>Incoming Rain:</b> ${rTomorrow.toFixed(1)} mm<br>
+                    <hr style="border-color: rgba(255,255,255,0.2); margin: 8px 0;"/>
                 `;
+                if (statusHex === "#ef4444") {
+                    popupText += `<i>Exceeds limit by ${diffLimit}°C</i>`;
+                } else if (statusHex === "#4ade80") {
+                    popupText += `<i>${diffLimit}°C below danger threshold.</i>`;
+                } else if (statusHex === "#00bfff") {
+                    popupText += `<i>Major flooding possible.</i>`;
+                }
+
+                // Add to Globe Data Array
+                const markerData = {
+                    lat: lat,
+                    lng: lon,
+                    name: regionName,
+                    temp: tToday,
+                    color: statusHex,
+                    icon: alertIcon,
+                    popupHTML: popupText
+                };
+
+                // Remove existing marker for this city if updating, then add new
+                globeData = globeData.filter(d => d.name !== regionName);
+                globeData.push(markerData);
+
+                // Render the HTML markers on the 3D globe
+                world.htmlElementsData(globeData)
+                     .htmlElement(d => {
+                         const el = document.createElement('div');
+                         // This is the physical label sticking to the globe!
+                         el.innerHTML = `
+                            <div class="globe-marker" style="background: ${d.color}30; border: 1px solid ${d.color}; color: ${d.color};">
+                                <span>${d.icon}</span>
+                                <span style="color: white;">${d.temp.toFixed(1)}°C</span>
+                            </div>`;
+                         // When clicked on the globe, show popup and update history
+                         el.onclick = () => {
+                             world.pointOfView({ lat: d.lat, lng: d.lng, altitude: 0.8 }, 1000);
+                             showPopup(d);
+                             updateHistoryWidget(d.name, times, temps, mins, rain, todayIdx);
+                         };
+                         return el;
+                     });
+                     
+                // Add animated circles/rings around the cities mapped from globeData
+                world.ringsData(globeData)
+                     .ringColor(d => d.color)
+                     .ringMaxRadius(d => d.color === "#ef4444" || d.color === "#00bfff" ? 4 : 1.5)
+                     .ringPropagationSpeed(d => d.color === "#ef4444" || d.color === "#00bfff" ? 1.5 : 0.5)
+                     .ringRepeatPeriod(d => d.color === "#ef4444" || d.color === "#00bfff" ? 700 : 2500);
                 
-                if (rTemp > rLimit) {
-                    popupText += `<hr style="border-color: rgba(255,255,255,0.2)"/><i>Exceeded threshold by ${(rTemp - rLimit).toFixed(1)}°C</i>`;
-                } else if (rTemp < rLimit) {
-                    popupText += `<hr style="border-color: rgba(255,255,255,0.2)"/><i>${(rLimit - rTemp).toFixed(1)}°C below danger threshold.</i>`;
+                if (isFocused) {
+                    showPopup(markerData);
+                    updateHistoryWidget(regionName, times, temps, mins, rain, todayIdx);
                 }
-
-                marker.bindPopup(popupText).openPopup();
-                activeLayers.push(circle, marker);
-
-                // Populate 7-Day History Widget
-                let historyHtml = "";
-                let startIndex = Math.max(0, latestIndex - 6);
-                for (let i = startIndex; i <= latestIndex; i++) {
-                    if (temps[i] !== null && mins[i] !== null) {
-                        let rowDate = new Date(times[i]).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                        let tMax = temps[i].toFixed(1);
-                        let tMin = mins[i].toFixed(1);
-                        historyHtml += `
-                            <div class="history-row">
-                                <span class="history-date">${rowDate}</span>
-                                <span class="history-temps">
-                                    <span class="temp-max">${tMax}°</span> 
-                                    <span class="temp-min">${tMin}°</span>
-                                </span>
-                            </div>
-                        `;
-                    }
-                }
-                document.getElementById('history-list').innerHTML = historyHtml;
-                document.getElementById('history-box').style.display = "block";
 
             } catch (err) {
                 console.error(err);
-                setStatus(`❌ Analysis Failed. Data unavailable.`, '#f87171');
+                if (isFocused) setStatus(`❌ Analysis Failed. Data unavailable.`, '#f87171');
             }
         }
+
+        function updateHistoryWidget(regionName, times, temps, mins, rain, todayIdx) {
+            document.getElementById('history-title').innerText = `🌤️ ${regionName} (7-Day)`;
+            let historyHtml = "";
+            let startIndex = todayIdx - 6;
+            
+            for (let i = startIndex; i <= todayIdx; i++) {
+                if (temps[i] !== null && mins[i] !== null) {
+                    let rowDate = new Date(times[i]).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    let tMax = temps[i].toFixed(1);
+                    let tMin = mins[i].toFixed(1);
+                    let rMm = rain[i] > 0 ? `<span class="rain-data">💧${rain[i]}mm</span>` : '';
+                    
+                    historyHtml += `
+                        <div class="history-row">
+                            <span class="history-date">${rowDate}</span>
+                            <span class="history-temps">
+                                <span class="temp-max">${tMax}°</span> 
+                                <span class="temp-min">${tMin}°</span>
+                                ${rMm}
+                            </span>
+                        </div>
+                    `;
+                }
+            }
+            document.getElementById('history-list').innerHTML = historyHtml;
+            document.getElementById('history-box').style.display = "block";
+        }
         
-        // Auto-load default
-        setTimeout(() => analyzeClimate(22.5726, 88.3639, 'Kolkata, India'), 500);
+        // --- 6. STARTUP: LOAD GLOBAL GRID --- //
+        function loadGlobalGrid() {
+            setStatus("📡 Initializing AI Global Threat Scan...", "#fbbf24");
+            defaultCities.forEach((city, index) => {
+                // Stagger API calls to look like the system is booting up and scanning
+                setTimeout(() => {
+                    analyzeClimate(city.lat, city.lon, city.name, false);
+                    if (index === defaultCities.length - 1) {
+                        setStatus("✅ System Active. Global monitoring engaged.", "#4ade80");
+                    }
+                }, index * 250); // Scans one city every 1/4 second
+            });
+        }
+
+        setTimeout(loadGlobalGrid, 500);
 
     </script>
 </body>
