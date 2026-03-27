@@ -31,29 +31,130 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            cursor: grab; /* Globe grabbing cursor */
+            cursor: grab;
+            /* Globe grabbing cursor */
         }
-        body:active { cursor: grabbing; }
+
+        body:active {
+            cursor: grabbing;
+        }
+
 
         #header-container {
             position: absolute;
-            top: 20px;
+            top: 15px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 999;
-            width: 90%;
-            max-width: 800px;
-            
+            width: 96%;
+            /* Makes the bar much longer */
+            max-width: 1400px;
+
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            
-            text-align: center;
+            border-radius: 12px;
+            /* Sleeker corners */
+            padding: 12px 24px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+
+            /* Turns it into a horizontal navbar */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
             transition: all 0.3s ease;
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            min-width: 250px;
+        }
+
+        h2 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 1.25rem;
+            /* Adjusted for navbar fit */
+            background: linear-gradient(to right, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+
+        #loading-status {
+            margin-top: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            height: 18px;
+        }
+
+        .dashboard-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            /* Aligns text to the right */
+            margin-bottom: 0;
+            font-size: 0.85rem;
+            gap: 4px;
+            min-width: 200px;
+        }
+
+        #live-time {
+            font-weight: 600;
+            color: #fbbf24;
+            font-size: 0.95rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex: 1;
+            /* Allows the center to stretch */
+            max-width: 600px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--secondary);
+        }
+
+        /* Responsive design so it doesn't break on small screens */
+        @media (max-width: 950px) {
+            #header-container {
+                flex-direction: column;
+                padding: 16px;
+                gap: 15px;
+            }
+
+            .header-brand,
+            .dashboard-meta {
+                align-items: center;
+                text-align: center;
+            }
+
+            .controls {
+                width: 100%;
+                max-width: 100%;
+            }
         }
 
         h2 {
@@ -66,7 +167,11 @@
             -webkit-text-fill-color: transparent;
         }
 
-        p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+        p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
 
         .dashboard-meta {
             display: flex;
@@ -76,8 +181,11 @@
             font-size: 0.85rem;
         }
 
-        #live-time { font-weight: 600; color: #fbbf24; }
-        
+        #live-time {
+            font-weight: 600;
+            color: #fbbf24;
+        }
+
         .controls {
             display: flex;
             gap: 12px;
@@ -98,7 +206,9 @@
             transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus { border-color: var(--secondary); }
+        input[type="text"]:focus {
+            border-color: var(--secondary);
+        }
 
         button {
             padding: 12px 20px;
@@ -111,17 +221,43 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        button:active { transform: scale(0.98); }
+        button:active {
+            transform: scale(0.98);
+        }
 
-        .btn-search { background-color: var(--primary); color: white; }
-        .btn-search:hover { background-color: var(--primary-hover); }
+        .btn-search {
+            background-color: var(--primary);
+            color: white;
+        }
 
-        .btn-location { background-color: var(--secondary); color: white; display: flex; align-items: center; gap: 6px; }
-        .btn-location:hover { background-color: var(--secondary-hover); }
+        .btn-search:hover {
+            background-color: var(--primary-hover);
+        }
 
-        #loading-status { margin-top: 16px; font-size: 0.9rem; font-weight: 600; height: 20px; }
+        .btn-location {
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        #map { flex-grow: 1; width: 100%; z-index: 1; }
+        .btn-location:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        #loading-status {
+            margin-top: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            height: 20px;
+        }
+
+        #map {
+            flex-grow: 1;
+            width: 100%;
+            z-index: 1;
+        }
 
         /* Custom 3D Globe Overlays */
         .globe-marker {
@@ -138,8 +274,10 @@
             align-items: center;
             gap: 6px;
             white-space: nowrap;
-            pointer-events: auto; /* Required for clicking in Globe.gl */
+            pointer-events: auto;
+            /* Required for clicking in Globe.gl */
         }
+
         .globe-marker:hover {
             transform: scale(1.15);
             box-shadow: 0 0 15px currentColor;
@@ -162,6 +300,7 @@
             display: none;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
         }
+
         .close-btn {
             position: absolute;
             top: 10px;
@@ -172,67 +311,140 @@
             font-size: 1.2rem;
             cursor: pointer;
         }
-        .close-btn:hover { color: white; }
+
+        .close-btn:hover {
+            color: white;
+        }
 
         #suggestions-box {
-            position: absolute; top: 100%; left: 0; width: 100%;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
             background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border); border-radius: 8px; margin-top: 4px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: none; flex-direction: column;
-            z-index: 1000; max-height: 250px; overflow-y: auto; box-sizing: border-box;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            margin-top: 4px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            max-height: 250px;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
 
         .suggestion-item {
-            padding: 10px 16px; cursor: pointer; color: white; font-size: 0.95rem; text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;
+            padding: 10px 16px;
+            cursor: pointer;
+            color: white;
+            font-size: 0.95rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
         }
-        .suggestion-item:last-child { border-bottom: none; }
-        .suggestion-item:hover { background: rgba(255,255,255,0.1); }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
 
         #history-box {
-            position: absolute; bottom: 30px; left: 20px; z-index: 999;
-            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 260px; display: none; color: white;
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            z-index: 999;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 260px;
+            display: none;
+            color: white;
             pointer-events: auto;
         }
 
-        #history-box h3 { margin: 0 0 12px 0; font-size: 1.1rem; color: #fbbf24; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
-        .history-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .history-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .history-date { color: var(--text-muted); }
-        .temp-max { color: #f87171; font-weight: 600; }
-        .temp-min { color: #60a5fa; font-weight: 600; margin-left: 8px; }
-        .rain-data { color: #00bfff; font-size: 0.8rem; margin-left: 8px; }
+        #history-box h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.1rem;
+            color: #fbbf24;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .history-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .history-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .history-date {
+            color: var(--text-muted);
+        }
+
+        .temp-max {
+            color: #f87171;
+            font-weight: 600;
+        }
+
+        .temp-min {
+            color: #60a5fa;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .rain-data {
+            color: #00bfff;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
     </style>
 </head>
 
 <body>
 
     <div id="header-container">
-        <h2>Spatiotemporal Climate Risk Explorer</h2>
-        
-        <div class="dashboard-meta">
-            <span>Target Region: <strong id="target-region" style="color: white;">Global View</strong></span>
-            <span id="live-time"></span>
+        <div class="header-brand">
+            <h2>Spatiotemporal Climate Risk Explorer</h2>
+            <div id="loading-status">System Initialized. Mapping Global Data.</div>
         </div>
-        
+
         <div class="controls">
-            <div style="position: relative; flex: 1; min-width: 200px;">
-                <input type="text" id="location-search" placeholder="Search City, Country..." onkeydown="if(event.key === 'Enter') searchLocation()" oninput="handleSearchInput()">
+            <div style="position: relative; flex: 1; width: 100%;">
+                <input type="text" id="location-search" placeholder="Search City, Country..."
+                    onkeydown="if(event.key === 'Enter') searchLocation()" oninput="handleSearchInput()">
                 <div id="suggestions-box"></div>
             </div>
-            <button class="btn-search" onclick="searchLocation()">Search Region</button>
-            <button class="btn-location" onclick="useMyLocation()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                My Location
+            <button class="btn-search" onclick="searchLocation()">Search</button>
+            <button class="btn-location" onclick="useMyLocation()" title="My Location">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
             </button>
         </div>
 
-        <div id="loading-status">System Initialized. Mapping Global Data.</div>
+        <div class="dashboard-meta">
+            <span id="live-time"></span>
+            <span>Target: <strong id="target-region" style="color: white;">Global View</strong></span>
+        </div>
     </div>
-
     <div id="custom-popup"></div>
 
     <div id="history-box">
@@ -244,12 +456,12 @@
 
     <script src="https://unpkg.com/three"></script>
     <script src="https://unpkg.com/globe.gl"></script>
-    
+
     <script>
         // --- 1. CLOCK --- //
         function updateClock() {
-            document.getElementById('live-time').innerText = new Date().toLocaleString('en-IN', { 
-                timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', 
+            document.getElementById('live-time').innerText = new Date().toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric',
                 hour: '2-digit', minute: '2-digit', second: '2-digit'
             }) + " (IST)";
         }
@@ -258,10 +470,10 @@
 
         // --- 2. 3D GLOBE SETUP (Replacing Leaflet) --- //
         const globeContainer = document.getElementById('map');
-        
+
         // Initialize the WebGL Globe
         const world = Globe()(globeContainer)
-            .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-dark.jpg') // High-res dark mode earth
+            .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
             .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
             .backgroundColor('#0f172a')
             .pointOfView({ lat: 20, lng: 79, altitude: 2.5 }); // Start zoomed over India
@@ -343,7 +555,7 @@
             if (!query) return;
             const box = document.getElementById('suggestions-box');
             if (box) box.style.display = 'none';
-            
+
             setStatus(`🔍 Geocoding ${query}...`, '#60a5fa');
             try {
                 const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`);
@@ -396,7 +608,7 @@
             popup.innerHTML = `<button class="close-btn" onclick="document.getElementById('custom-popup').style.display='none'">✖</button>` + dataObj.popupHTML;
             popup.style.borderColor = dataObj.color;
             popup.style.display = 'block';
-            
+
             // Stop rotation when looking at info
             world.controls().autoRotate = false;
         }
@@ -406,7 +618,7 @@
             if (isFocused) {
                 document.getElementById('target-region').innerText = regionName;
                 setStatus(`📡 Analyzing Risk for ${regionName}...`, '#60a5fa');
-                
+
                 // Fly the 3D camera to the location
                 world.pointOfView({ lat: lat, lng: lon, altitude: 0.8 }, 1500);
             }
@@ -416,27 +628,27 @@
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&past_days=30&forecast_days=2&timezone=auto`;
                 const res = await fetch(url);
                 const data = await res.json();
-                
+
                 const times = data.daily.time;
                 const temps = data.daily.temperature_2m_max;
                 const mins = data.daily.temperature_2m_min;
                 const rain = data.daily.precipitation_sum;
-                
+
                 const todayIdx = temps.length - 2;
                 const tomorrowIdx = temps.length - 1;
-                
+
                 const tToday = temps[todayIdx];
                 const tTomorrow = temps[tomorrowIdx];
                 const rTomorrow = rain[tomorrowIdx];
                 const currentDate = times[todayIdx];
-                
+
                 // Calculate 21-Day Rolling Average & StdDev
                 let windowTemps = temps.slice(Math.max(0, todayIdx - 20), todayIdx + 1).filter(t => t !== null);
                 let mean = windowTemps.reduce((a, b) => a + b, 0) / windowTemps.length;
                 let variance = windowTemps.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (windowTemps.length - 1);
                 let std = Math.sqrt(variance);
                 let limit = mean + (2 * std);
-                
+
                 let rTempTomorrow = parseFloat(tTomorrow.toFixed(1));
                 let rLimit = parseFloat(limit.toFixed(1));
 
@@ -503,30 +715,30 @@
 
                 // Render the HTML markers on the 3D globe
                 world.htmlElementsData(globeData)
-                     .htmlElement(d => {
-                         const el = document.createElement('div');
-                         // This is the physical label sticking to the globe!
-                         el.innerHTML = `
+                    .htmlElement(d => {
+                        const el = document.createElement('div');
+                        // This is the physical label sticking to the globe!
+                        el.innerHTML = `
                             <div class="globe-marker" style="background: ${d.color}30; border: 1px solid ${d.color}; color: ${d.color};">
                                 <span>${d.icon}</span>
                                 <span style="color: white;">${d.temp.toFixed(1)}°C</span>
                             </div>`;
-                         // When clicked on the globe, show popup and update history
-                         el.onclick = () => {
-                             world.pointOfView({ lat: d.lat, lng: d.lng, altitude: 0.8 }, 1000);
-                             showPopup(d);
-                             updateHistoryWidget(d.name, times, temps, mins, rain, todayIdx);
-                         };
-                         return el;
-                     });
-                     
+                        // When clicked on the globe, show popup and update history
+                        el.onclick = () => {
+                            world.pointOfView({ lat: d.lat, lng: d.lng, altitude: 0.8 }, 1000);
+                            showPopup(d);
+                            updateHistoryWidget(d.name, times, temps, mins, rain, todayIdx);
+                        };
+                        return el;
+                    });
+
                 // Add animated circles/rings around the cities mapped from globeData
                 world.ringsData(globeData)
-                     .ringColor(d => d.color)
-                     .ringMaxRadius(d => d.color === "#ef4444" || d.color === "#00bfff" ? 4 : 1.5)
-                     .ringPropagationSpeed(d => d.color === "#ef4444" || d.color === "#00bfff" ? 1.5 : 0.5)
-                     .ringRepeatPeriod(d => d.color === "#ef4444" || d.color === "#00bfff" ? 700 : 2500);
-                
+                    .ringColor(d => d.color)
+                    .ringMaxRadius(d => d.color === "#ef4444" || d.color === "#00bfff" ? 4 : 1.5)
+                    .ringPropagationSpeed(d => d.color === "#ef4444" || d.color === "#00bfff" ? 1.5 : 0.5)
+                    .ringRepeatPeriod(d => d.color === "#ef4444" || d.color === "#00bfff" ? 700 : 2500);
+
                 if (isFocused) {
                     showPopup(markerData);
                     updateHistoryWidget(regionName, times, temps, mins, rain, todayIdx);
@@ -542,14 +754,14 @@
             document.getElementById('history-title').innerText = `🌤️ ${regionName} (7-Day)`;
             let historyHtml = "";
             let startIndex = todayIdx - 6;
-            
+
             for (let i = startIndex; i <= todayIdx; i++) {
                 if (temps[i] !== null && mins[i] !== null) {
                     let rowDate = new Date(times[i]).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                     let tMax = temps[i].toFixed(1);
                     let tMin = mins[i].toFixed(1);
                     let rMm = rain[i] > 0 ? `<span class="rain-data">💧${rain[i]}mm</span>` : '';
-                    
+
                     historyHtml += `
                         <div class="history-row">
                             <span class="history-date">${rowDate}</span>
@@ -565,7 +777,7 @@
             document.getElementById('history-list').innerHTML = historyHtml;
             document.getElementById('history-box').style.display = "block";
         }
-        
+
         // --- 6. STARTUP: LOAD GLOBAL GRID --- //
         function loadGlobalGrid() {
             setStatus("📡 Initializing AI Global Threat Scan...", "#fbbf24");
